@@ -1,0 +1,181 @@
+﻿@page
+@model EditModel
+@{
+    List<SelectListItem> items = new List<SelectListItem>();
+    int value = 1;
+    items.Add(new SelectListItem() { Text = "TextBox", Value = (value++).ToString() });
+    items.Add(new SelectListItem() { Text = "TextArea", Value = (value++).ToString() });
+    items.Add(new SelectListItem() { Text = "RichText", Value = (value++).ToString() });
+    items.Add(new SelectListItem() { Text = "DropDown", Value = (value++).ToString() });
+    items.Add(new SelectListItem() { Text = "BooleanRadioButton", Value = (value++).ToString() });
+    items.Add(new SelectListItem() { Text = "Checkbox", Value = (value++).ToString() });
+    items.Add(new SelectListItem() { Text = "RadioButton", Value = (value++).ToString() });
+    items.Add(new SelectListItem() { Text = "Email", Value = (value++).ToString() });
+    items.Add(new SelectListItem() { Text = "DateTime", Value = (value++).ToString() });
+    items.Add(new SelectListItem() { Text = "Hidden", Value = (value++).ToString() });
+    items.Add(new SelectListItem() { Text = "Number", Value = (value++).ToString() });
+    items.Add(new SelectListItem() { Text = "Lookup", Value = (value++).ToString() });
+    items.Add(new SelectListItem() { Text = "SimpleDynamicList", Value = (value++).ToString() });
+}
+
+<h3>New entity</h3>
+<form method="post">
+    @Html.HiddenFor(m => m.Entity.Id)
+
+    <fieldset>
+        <legend>Entity definition</legend>
+        <p>
+            @Html.LabelFor(m => m.Entity.Name, "Name")
+            @Html.TextBoxFor(m => m.Entity.Name)
+
+            @Html.LabelFor(m => m.Entity.PluralName, "Plural name")
+            @Html.TextBoxFor(m => m.Entity.PluralName)
+
+            @Html.LabelFor(m => m.Entity.DatabaseTableName, "Data table name")
+            @Html.TextBoxFor(m => m.Entity.DatabaseTableName)
+
+        </p>
+        <p>
+            @Html.LabelFor(m => m.Entity.Description, "Description")
+            @Html.TextAreaFor(m => m.Entity.Description)
+        </p>
+        <p>
+            @Html.LabelFor(m => m.Entity.IsActive, "Active")
+            @Html.CheckBoxFor(m => m.Entity.IsActive)
+
+            @Html.LabelFor(m => m.Entity.IsPublished, "Published")
+            @Html.CheckBoxFor(m => m.Entity.IsPublished)
+        </p>
+        <p>
+            <label>Status:</label>
+            <strong>Active</strong>
+        </p>
+    </fieldset>
+    <fieldset id="props">
+        <legend>Add properties</legend>
+        <p>
+            <label>Display name</label>
+            <input id="prop-displayname" type="text" />
+            <label>Column name</label>
+            <input id="prop-name" type="text" />
+            <label>Type</label>
+            @Html.DropDownList("prop-type", items)
+        </p>
+        <p>
+            <label>Description</label>
+            <textarea id="prop-desc"></textarea>
+        </p>
+        <p>
+            <label>Published:</label>
+            <input id="prop-ispublished" type="checkbox" />
+            <label>Disabled:</label>
+            <input id="prop-isdisabled" type="checkbox" />
+            <label>Read only:</label>
+            <input id="prop-isreadonly" type="checkbox" />
+            <label>Requierd:</label>
+            <input id="prop-isrequired" type="checkbox" />
+            <label>Searchable:</label>
+            <input id="prop-issearchable" type="checkbox" />
+        </p>
+        <p>
+            <label>Max length</label>
+            <input id="prop-maxlength" type="number" />
+        </p>
+        <input type="button" value="add property" onclick="addProperty()" />
+        <h4>Properties</h4>
+        <ul id="prop-list"></ul>
+    </fieldset>
+    <div id="props-hiddens">
+
+    </div>
+    <p>
+        <input type="submit" value="save" />
+        <input type="submit" value="cancel" />
+    </p>
+</form>
+
+<script type="text/javascript">
+    var properties = [];
+
+    function addProperty() {
+        var e = $('#props');
+
+        var prop = {
+            Id: '',
+            ColumnName: e.find('#prop-name').val(),
+            DisplayName: e.find('#prop-displayname').val(),
+            Type: e.find('#prop-type').val(),
+            TypeName: e.find('#prop-type option:selected').text(),
+            Description: e.find('#prop-desc').val(),
+            IsPublished: e.find('#prop-ispublished').is(':checked'),
+            IsDisabled: e.find('#prop-isdisabled').is(':checked'),
+            IsReadonly: e.find('#prop-isreadonly').is(':checked'),
+            IsRequierd: e.find('#prop-isrequired').is(':checked'),
+            IsSearchable: e.find('#prop-issearchable').is(':checked'),
+            IsDeleted: false,
+            MaxLength: e.find('#prop-maxlength').val()
+        }
+
+        properties.push(prop);
+
+        updateProperties();
+    }
+
+    function updateProperties() {
+        $('#prop-list').html('');
+        $('#props-hiddens').html('');
+
+        for (var i = 0; i < properties.length; i++) {
+            addPropItem(properties[i]);
+            addPropHiddens(properties[i], i);
+        }
+
+        var e = $('#props');
+        e.find('#prop-name').val('');
+        e.find('#prop-displayname').val('');
+        e.find('#prop-type').val('1');
+        e.find('#prop-desc').val('');
+        e.find('#prop-ispublished').prop('checked', false);
+        e.find('#prop-isdisabled').prop('checked', false);
+        e.find('#prop-isreadonly').prop('checked', false);
+        e.find('#prop-isrequired').prop('checked', false);
+        e.find('#prop-issearchable').prop('checked', false);
+        e.find('#prop-maxlength').val('');
+    }
+
+    function addPropItem(prop) {
+        var li = document.createElement('li');
+        var span = document.createElement('span');
+        span.textContent = prop.DisplayName + '(' + prop.TypeName + ') ';
+        var a1 = document.createElement('a');
+        a1.href = 'javascript:vaoi(0)';
+        a1.classList.add('edit-prop');
+        a1.textContent = 'Edit';
+        var a2 = document.createElement('a');
+        a2.href = 'javascript:vaoi(0)';
+        a2.classList.add('delete-prop');
+        a2.textContent = 'Delete';
+        var space = document.createElement('span');
+        space.textContent = ' ';
+        li.appendChild(span);
+        li.appendChild(a1);
+        li.appendChild(space);
+        li.appendChild(a2);
+        document.getElementById('prop-list').appendChild(li);
+    }
+
+    function addPropHiddens(prop, index) {
+        var e = document.getElementById('props-hiddens');
+
+        for (var propName in prop) {
+            if (propName != 'TypeName') {
+                var h = document.createElement('input');
+                h.type = 'hidden';
+                h.name = 'Entity.Properties[' + index + '].' + propName;
+                h.value = prop[propName];
+                e.appendChild(h);
+            }
+        }
+    }
+
+</script>
